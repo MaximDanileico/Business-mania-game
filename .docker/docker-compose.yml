@@ -1,0 +1,71 @@
+version: "3.8"
+
+networks:
+  backend:
+  frontend:
+
+services:
+  game-php:
+    container_name: game-php
+    restart: on-failure
+    build:
+      context: ./
+      dockerfile: modules/php/Dockerfile
+    working_dir: /backend
+    environment:
+      SSH_AUTH_SOCK: /ssh-agent
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../backend:/backend:rw
+      - $SSH_AUTH_SOCK:/ssh-agent
+    networks:
+      - backend
+    depends_on:
+      - game-mysql
+
+  game-mysql:
+    container_name: game-mysql
+    restart: on-failure
+    build:
+      context: ./
+      dockerfile: modules/mysql/Dockerfile
+    environment:
+      TIMEZONE: ${MYSQL_TIMEZONE}
+      MYSQL_USER_ROOT: ${MYSQL_USER_ROOT}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD_ROOT}
+    volumes:
+      - ./.storage/mysql:/var/lib/mysql
+    ports:
+      - "3030:3306"
+    networks:
+      - backend
+
+  game-redis:
+    container_name: game-redis
+    restart: on-failure
+    build:
+      context: ./
+      dockerfile: modules/redis/Dockerfile
+    ports:
+      - "6363:6379"
+    networks:
+      - backend
+    depends_on:
+      - game-php
+
+  game-nginx:
+    container_name: game-nginx
+    restart: on-failure
+    build:
+      context: ./
+      dockerfile: modules/nginx/Dockerfile
+    volumes:
+      - ../backend:/backend:rw
+    ports:
+      - "443:443"
+      - "80:80"
+    networks:
+      - backend
+    depends_on:
+      - game-php
