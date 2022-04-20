@@ -1,0 +1,22 @@
+version: "3.8"
+networks:
+  backend:
+  frontend:
+
+services:
+  game-php:
+    container_name: game-php
+    restart: on-failure
+    build:
+      context: ./
+      dockerfile: modules/php/Dockerfile
+    working_dir: /backend
+    environment:
+      SSH_AUTH_SOCK: /ssh-agent
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../backend:/backend:rw
+      - $SSH_AUTH_SOCK:/ssh-agent
+    networks:
+      - backend
