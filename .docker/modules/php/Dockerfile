@@ -110,7 +110,7 @@ RUN rm -rf /var/cache/apk && \
 
 STOPSIGNAL SIGQUIT
 
-EXPOSE 9000
+EXPOSE 9090
 CMD ["php-fpm"]
 
 # Metadata
