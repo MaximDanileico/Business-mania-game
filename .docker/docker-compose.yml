@@ -1,4 +1,5 @@
 version: "3.8"
+
 networks:
   backend:
   frontend:
@@ -48,6 +49,22 @@ services:
       dockerfile: modules/redis/Dockerfile
     ports:
       - "6363:6379"
+    networks:
+      - backend
+    depends_on:
+      - game-php
+
+  game-nginx:
+    container_name: game-nginx
+    restart: on-failure
+    build:
+      context: ./
+      dockerfile: modules/nginx/Dockerfile
+    volumes:
+      - ../backend:/backend:rw
+    ports:
+      - "443:443"
+      - "80:80"
     networks:
       - backend
     depends_on:
